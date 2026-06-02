@@ -23,6 +23,5 @@ struct SensorData {
 void     initSensors();
 void     resetENS();
 void     updateSensors(SensorData &data);
-bool     connectWiFi();
 bool     syncRTCfromNTP();
 uint32_t getRTCUnixTime();

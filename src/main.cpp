@@ -34,6 +34,44 @@ static UiStatus currentUiStatus() {
     return st;
 }
 
+static bool connectWiFi() {
+    String ssid = RuntimeSettings::wifiSsid();
+    if (ssid.isEmpty()) return false;
+
+    WiFi.persistent(false);
+    WiFi.setHostname(RuntimeSettings::hostname().c_str());
+    WiFi.mode(WIFI_STA);
+
+    if (RuntimeSettings::staticIpEnabled()) {
+        IPAddress ip, gw, sn, dns;
+        if (ip.fromString(RuntimeSettings::staticIp()) &&
+            gw.fromString(RuntimeSettings::staticGateway()) &&
+            sn.fromString(RuntimeSettings::staticSubnet())) {
+            dns.fromString(RuntimeSettings::staticDns());
+            WiFi.config(ip, gw, sn, dns);
+        }
+    } else {
+        WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
+    }
+
+    WiFi.begin(ssid.c_str(), RuntimeSettings::wifiPassword().c_str());
+    WiFi.setAutoReconnect(true);
+
+    int attempts = 0;
+    while (WiFi.status() != WL_CONNECTED && attempts < 30) {
+        delay(500);
+        attempts++;
+    }
+
+    if (WiFi.status() != WL_CONNECTED) {
+        WiFi.disconnect(true);
+        Serial.println("WiFi: FAILED");
+        return false;
+    }
+    Serial.printf("WiFi: OK %s\n", WiFi.localIP().toString().c_str());
+    return true;
+}
+
 void setup() {
     Serial.begin(115200);
     RuntimeSettings::begin();

@@ -1,3 +1,3 @@
 #pragma once
-#define FW_VERSION "2.0.0"
+#define FW_VERSION "2.1.1"
 #define DEVICE_BRAND "AirMonitor"
